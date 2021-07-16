@@ -26,7 +26,7 @@ public abstract class MainPanel extends JPanel {
 
   public void initialize(ActionListener actionListener) {
     setLayout(null);
-    setBounds(5, 30, 1020, 510);
+    setBounds(5, 30, 1020, 535);
   }
 
   @Override
@@ -36,7 +36,7 @@ public abstract class MainPanel extends JPanel {
     Rectangle backupClipBounds = (Rectangle) graphics2D.getClipBounds().clone();
 
     // 绘制左边的画布。
-    graphics2D.translate(5, 5);
+    graphics2D.translate(5, 30);
     graphics2D.clipRect(0, 0, 500, 500);
     drawLeftCanvas(graphics2D);
     graphics2D.setTransform((AffineTransform) backupTransform.clone());
@@ -44,7 +44,7 @@ public abstract class MainPanel extends JPanel {
         backupClipBounds.x, backupClipBounds.y, backupClipBounds.width, backupClipBounds.height);
 
     // 绘制右边的画布。
-    graphics2D.translate(515, 5);
+    graphics2D.translate(515, 30);
     graphics2D.clipRect(0, 0, 500, 500);
     drawRightCanvas(graphics2D);
     graphics2D.setTransform(backupTransform);
@@ -57,8 +57,8 @@ public abstract class MainPanel extends JPanel {
     graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     graphics2D.setColor(Color.decode("#171F27"));
     graphics2D.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-    graphics2D.drawRect(5, 5, 500, 500);
-    graphics2D.drawRect(515, 5, 500, 500);
+    graphics2D.drawRect(5, 30, 500, 500);
+    graphics2D.drawRect(515, 30, 500, 500);
   }
 
   protected abstract void drawLeftCanvas(Graphics2D graphics2D);
