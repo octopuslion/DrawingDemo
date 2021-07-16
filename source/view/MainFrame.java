@@ -17,6 +17,8 @@ public class MainFrame extends JFrame {
   private final JButton shadowShowButton;
   private final JButton glowShowButton;
   private final JButton animationShowButton;
+  private final JButton convolutionShowButton;
+  private final JButton compressionShowButton;
   private final JButton refreshButton;
 
   public MainFrame(Font componentFont) {
@@ -25,6 +27,8 @@ public class MainFrame extends JFrame {
     shadowShowButton = new JButton();
     glowShowButton = new JButton();
     animationShowButton = new JButton();
+    convolutionShowButton = new JButton();
+    compressionShowButton = new JButton();
     refreshButton = new JButton();
   }
 
@@ -62,6 +66,20 @@ public class MainFrame extends JFrame {
     animationShowButton.setText("动画");
     animationShowButton.addActionListener(actionListener);
     container.add(animationShowButton);
+
+    convolutionShowButton.setName("MainFrame:ConvolutionShowButton");
+    convolutionShowButton.setBounds(185, 5, 40, 20);
+    convolutionShowButton.setFont(componentFont);
+    convolutionShowButton.setText("图像");
+    convolutionShowButton.addActionListener(actionListener);
+    container.add(convolutionShowButton);
+
+    compressionShowButton.setName("MainFrame:CompressionShowButton");
+    compressionShowButton.setBounds(230, 5, 40, 20);
+    compressionShowButton.setFont(componentFont);
+    compressionShowButton.setText("压缩");
+    compressionShowButton.addActionListener(actionListener);
+    container.add(compressionShowButton);
 
     refreshButton.setName("MainFrame:RefreshButton");
     refreshButton.setBounds(980, 545, 40, 20);

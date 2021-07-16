@@ -9,24 +9,30 @@ import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 
-public class FrameBuffer implements Runnable {
-  private final Image frontBufferImage; // 前台缓存，会被绘制到控件上。
-  private final Image backBufferImage; // 后台缓存，在后台线程中阻塞绘制。
+public class BufferInterpolator implements Runnable {
   private final Color backgroundColor;
+  private final Image frontBufferImage;
+  private final Image backBufferImage;
   private Point movePoint;
   private Thread thread;
   private boolean stopThread;
 
-  public FrameBuffer(Color backgroundColor) {
-    frontBufferImage = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
-    backBufferImage = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
+  public BufferInterpolator(Color backgroundColor) {
     this.backgroundColor = backgroundColor;
-    movePoint = null;
-    thread = null;
-    stopThread = false;
+
+    // 前台缓存，会被绘制到控件上。
+    frontBufferImage = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
+
+    // 后台缓存，在后台线程中阻塞绘制。
+    backBufferImage = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
+
+    movePoint = null; // 动画路径平移点。
+    thread = null; // 后台绘制线程。
+    stopThread = false; // 后台绘制线程结束标志。
   }
 
   public void start() {
+    // 开启后台绘制线程。
     stopThread = false;
     if (thread == null) {
       thread = new Thread(this);
@@ -35,14 +41,15 @@ public class FrameBuffer implements Runnable {
   }
 
   public void stop() {
+    // 终止后台绘制线程。
     stopThread = true;
   }
 
-  public Image getFrontBufferImage() {
+  public Image getBufferImage() {
     return frontBufferImage;
   }
 
-  public void draw(Point movePoint) {
+  public void update(Point movePoint) {
     if (this.movePoint == null) {
       this.movePoint = new Point(movePoint.x, movePoint.y);
     } else {
@@ -54,10 +61,10 @@ public class FrameBuffer implements Runnable {
   public void run() {
     while (thread != null && !stopThread) {
       if (movePoint == null) {
+        // 如果当前没有路径平移点，则等待小段时间后再获取。
         try {
           thread.join(100);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
+        } catch (InterruptedException ignored) {
         }
       } else {
         drawBackBuffer(new Point(movePoint.x, movePoint.y));

@@ -35,6 +35,7 @@ public abstract class MainPanel extends JPanel {
     AffineTransform backupTransform = (AffineTransform) graphics2D.getTransform().clone();
     Rectangle backupClipBounds = (Rectangle) graphics2D.getClipBounds().clone();
 
+    // 绘制左边的画布。
     graphics2D.translate(5, 5);
     graphics2D.clipRect(0, 0, 500, 500);
     drawLeftCanvas(graphics2D);
@@ -42,6 +43,7 @@ public abstract class MainPanel extends JPanel {
     graphics2D.setClip(
         backupClipBounds.x, backupClipBounds.y, backupClipBounds.width, backupClipBounds.height);
 
+    // 绘制右边的画布。
     graphics2D.translate(515, 5);
     graphics2D.clipRect(0, 0, 500, 500);
     drawRightCanvas(graphics2D);
@@ -49,13 +51,14 @@ public abstract class MainPanel extends JPanel {
     graphics2D.setClip(
         backupClipBounds.x, backupClipBounds.y, backupClipBounds.width, backupClipBounds.height);
 
+    paintComponents(graphics2D);
+
+    // 绘制左右两边画布的边框。
     graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     graphics2D.setColor(Color.decode("#171F27"));
     graphics2D.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
     graphics2D.drawRect(5, 5, 500, 500);
     graphics2D.drawRect(515, 5, 500, 500);
-
-    paintComponents(graphics2D);
   }
 
   protected abstract void drawLeftCanvas(Graphics2D graphics2D);

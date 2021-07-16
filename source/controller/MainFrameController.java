@@ -9,6 +9,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.JPanel;
 import view.AnimationPanel;
+import view.CompressionPanel;
+import view.ConvolutionPanel;
 import view.GlowPanel;
 import view.GradientPanel;
 import view.MainFrame;
@@ -21,16 +23,20 @@ public class MainFrameController extends WindowAdapter implements ActionListener
   private final ShadowPanel shadowPanel;
   private final GlowPanel glowPanel;
   private final AnimationPanel animationPanel;
+  private final ConvolutionPanel convolutionPanel;
+  private final CompressionPanel compressionPanel;
   private JPanel mainFramePanel;
 
   public MainFrameController() {
     Font componentFont = new Font("微软雅黑", Font.PLAIN, 14);
     mainFrame = new MainFrame(componentFont);
-    mainFramePanel = null;
     gradientPanel = new GradientPanel(componentFont);
     shadowPanel = new ShadowPanel(componentFont);
     glowPanel = new GlowPanel(componentFont);
     animationPanel = new AnimationPanel(componentFont);
+    convolutionPanel = new ConvolutionPanel(componentFont);
+    compressionPanel = new CompressionPanel(componentFont);
+    mainFramePanel = null;
   }
 
   public void initialize() {
@@ -39,6 +45,8 @@ public class MainFrameController extends WindowAdapter implements ActionListener
     shadowPanel.initialize(this);
     glowPanel.initialize(this);
     animationPanel.initialize(this);
+    convolutionPanel.initialize(this);
+    compressionPanel.initialize(this);
   }
 
   public void show() {
@@ -53,6 +61,7 @@ public class MainFrameController extends WindowAdapter implements ActionListener
 
   @Override
   public void actionPerformed(ActionEvent e) {
+    // 控件操作事件处理。
     Component component = (Component) e.getSource();
     if (component == null) {
       return;
@@ -68,17 +77,26 @@ public class MainFrameController extends WindowAdapter implements ActionListener
     } else if ("MainFrame:AnimationShowButton".equals(name)) {
       updateMainFramePanel(animationPanel);
       animationPanel.animationStart();
+    } else if ("MainFrame:ConvolutionShowButton".equals(name)) {
+      updateMainFramePanel(convolutionPanel);
+    } else if ("MainFrame:CompressionShowButton".equals(name)) {
+      updateMainFramePanel(compressionPanel);
     } else if ("MainFrame:RefreshButton".equals(name)) {
       mainFrame.setSize(1030, 590);
       if (mainFramePanel != null) {
         mainFramePanel.updateUI();
       }
     } else if ("AnimationPanel:ToggleButton".equals(name)) {
-      animationPanel.statusToggle();
+      animationPanel.togglePlayType();
+    } else if ("ConvolutionPanel:KernelRadioButton".equals(name)) {
+      convolutionPanel.switchKernel();
+    } else if ("CompressionPanel:AlgorithmRadioButton".equals(name)) {
+      compressionPanel.switchAlgorithm();
     }
   }
 
   private void updateMainFramePanel(JPanel panel) {
+    // 更新展示面板。
     Container container = mainFrame.getContentPane();
     if (mainFramePanel != null) {
       container.remove(mainFramePanel);

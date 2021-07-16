@@ -10,7 +10,7 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import view.animation.FrameBuffer;
+import view.animation.BufferInterpolator;
 
 public class AnimationPanel extends MainPanel implements Runnable {
 
@@ -21,8 +21,8 @@ public class AnimationPanel extends MainPanel implements Runnable {
   private final int moveRadius;
   private final Point movePoint;
   private final int frameCount;
-  private final FrameBuffer frameBuffer;
-  private byte toggleStatus;
+  private final BufferInterpolator interpolator;
+  private byte playType;
   private Thread thread;
   private boolean stopThread;
 
@@ -31,13 +31,13 @@ public class AnimationPanel extends MainPanel implements Runnable {
 
     toggleButton = new JButton();
     captionLabel = new JLabel();
-    toggleStatus = 1;
-    moveRadius = 30;
-    movePoint = new Point(-moveRadius, -moveRadius);
+    moveRadius = 30; // 动画路径的半径。
+    movePoint = new Point(-moveRadius, -moveRadius); // 动画路径平移点。
+    interpolator = new BufferInterpolator(getBackground()); // 双缓存绘制器。
+    playType = 1; // 播放状态标志，1=未使用双缓存，2=使用双缓存。
     frameCount = 24; // 帧数。
-    thread = null;
-    stopThread = false;
-    frameBuffer = new FrameBuffer(getBackground()); // 双缓存绘制器。
+    thread = null; // 动画线程。
+    stopThread = false; // 动画线程结束标志。
   }
 
   @Override
@@ -58,20 +58,21 @@ public class AnimationPanel extends MainPanel implements Runnable {
     add(captionLabel);
   }
 
-  public void statusToggle() {
-    if (toggleStatus == 1) {
+  public void togglePlayType() {
+    if (playType == 1) {
       captionLabel.setText("使用双缓存");
-      toggleStatus = 2;
+      playType = 2;
     } else {
       captionLabel.setText("未使用双缓存");
-      toggleStatus = 1;
+      playType = 1;
     }
 
     updateUI();
   }
 
   public void animationStart() {
-    frameBuffer.start();
+    // 启动动画线程和双缓存绘制器。
+    interpolator.start();
     stopThread = false;
     if (thread == null) {
       thread = new Thread(this);
@@ -80,8 +81,9 @@ public class AnimationPanel extends MainPanel implements Runnable {
   }
 
   public void animationStop() {
+    // 终止动画线程和双缓存绘制器。
     stopThread = true;
-    frameBuffer.stop();
+    interpolator.stop();
   }
 
   @Override
@@ -95,7 +97,7 @@ public class AnimationPanel extends MainPanel implements Runnable {
   }
 
   private void draw(Graphics2D graphics2D) {
-    if (toggleStatus == 1) {
+    if (playType == 1) {
       // 未使用双缓存绘制。
       int[] polygonXPoints = new int[] {200, 130, 350, 350, 250, 300};
       int[] polygonYPoints = new int[] {50, 350, 350, 270, 270, 130};
@@ -114,7 +116,7 @@ public class AnimationPanel extends MainPanel implements Runnable {
       }
     } else {
       // 使用双缓存绘制。
-      graphics2D.drawImage(frameBuffer.getFrontBufferImage(), 0, 0, 500, 500, null);
+      graphics2D.drawImage(interpolator.getBufferImage(), 0, 0, 500, 500, null);
     }
   }
 
@@ -122,39 +124,41 @@ public class AnimationPanel extends MainPanel implements Runnable {
   public void run() {
     while (thread != null && !stopThread) {
       try {
-        // 刷新绘制图形的位置。
-        if (movePoint.y == -moveRadius) {
-          if (movePoint.x == moveRadius) {
-            movePoint.setLocation(movePoint.x, movePoint.y + 1);
-          } else {
-            movePoint.setLocation(movePoint.x + 1, movePoint.y);
-          }
-        } else if (movePoint.x == moveRadius) {
-          if (movePoint.y == moveRadius) {
-            movePoint.setLocation(movePoint.x - 1, movePoint.y);
-          } else {
-            movePoint.setLocation(movePoint.x, movePoint.y + 1);
-          }
-        } else if (movePoint.y == moveRadius) {
-          if (movePoint.x == -moveRadius) {
-            movePoint.setLocation(movePoint.x, movePoint.y - 1);
-          } else {
-            movePoint.setLocation(movePoint.x - 1, movePoint.y);
-          }
-        } else if (movePoint.x == -moveRadius) {
-          movePoint.setLocation(movePoint.x, movePoint.y - 1);
-        }
-
-        frameBuffer.draw(movePoint);
+        updateMovePoint();
+        interpolator.update(movePoint);
         updateUI();
 
         // 根据帧数控制绘制间隔。
         thread.join(1000 / frameCount);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
+      } catch (InterruptedException ignored) {
       }
     }
 
     thread = null;
+  }
+
+  private void updateMovePoint() {
+    // 更新绘制图形的平移位置，作正矩形路径平移。
+    if (movePoint.y == -moveRadius) {
+      if (movePoint.x == moveRadius) {
+        movePoint.setLocation(movePoint.x, movePoint.y + 1);
+      } else {
+        movePoint.setLocation(movePoint.x + 1, movePoint.y);
+      }
+    } else if (movePoint.x == moveRadius) {
+      if (movePoint.y == moveRadius) {
+        movePoint.setLocation(movePoint.x - 1, movePoint.y);
+      } else {
+        movePoint.setLocation(movePoint.x, movePoint.y + 1);
+      }
+    } else if (movePoint.y == moveRadius) {
+      if (movePoint.x == -moveRadius) {
+        movePoint.setLocation(movePoint.x, movePoint.y - 1);
+      } else {
+        movePoint.setLocation(movePoint.x - 1, movePoint.y);
+      }
+    } else if (movePoint.x == -moveRadius) {
+      movePoint.setLocation(movePoint.x, movePoint.y - 1);
+    }
   }
 }
