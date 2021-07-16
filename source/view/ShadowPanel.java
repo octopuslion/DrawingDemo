@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.event.ActionListener;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
@@ -78,7 +79,7 @@ public class ShadowPanel extends MainPanel {
 
     maxAlphaTextField.setBounds(290, 5, 40, 20);
     maxAlphaTextField.setFont(componentFont);
-    maxAlphaTextField.setText("150");
+    maxAlphaTextField.setText("100");
     add(maxAlphaTextField);
 
     decreaseAlphaLabel.setBounds(335, 5, 100, 20);
@@ -118,7 +119,7 @@ public class ShadowPanel extends MainPanel {
 
     degreeTextField.setBounds(670, 5, 40, 20);
     degreeTextField.setFont(componentFont);
-    degreeTextField.setText("30");
+    degreeTextField.setText("45");
     add(degreeTextField);
   }
 
@@ -170,6 +171,7 @@ public class ShadowPanel extends MainPanel {
   }
 
   private void drawShadow(Graphics2D graphics2D, Polygon polygon) {
+    // 绘制阴影。
     int minGray = getValue(minGrayTextField, 0, 255); // 阴影的开始颜色，最低灰度值，0-255。
     int incrementGray = getValue(incrementGrayTextField, 0, 255); // 阴影的颜色增量，灰度逐渐变高，0为不变。
     int maxAlpha = getValue(maxAlphaTextField, 0, 255); // 阴影的开始透明度，最高透明度，0-255。

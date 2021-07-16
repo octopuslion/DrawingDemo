@@ -45,10 +45,10 @@ public class GradientPanel extends MainPanel {
 
     beginColorComboBox.setBounds(70, 5, 70, 20);
     beginColorComboBox.setFont(componentFont);
-    beginColorComboBox.addItem("红");
-    beginColorComboBox.addItem("黄");
     beginColorComboBox.addItem("蓝");
-    beginColorComboBox.setSelectedIndex(2);
+    beginColorComboBox.addItem("绿");
+    beginColorComboBox.addItem("橙");
+    beginColorComboBox.setSelectedIndex(0);
     add(beginColorComboBox);
 
     endColorLabel.setBounds(145, 5, 100, 20);
@@ -58,9 +58,9 @@ public class GradientPanel extends MainPanel {
 
     endColorComboBox.setBounds(210, 5, 70, 20);
     endColorComboBox.setFont(componentFont);
-    endColorComboBox.addItem("红");
-    endColorComboBox.addItem("黄");
     endColorComboBox.addItem("蓝");
+    endColorComboBox.addItem("绿");
+    endColorComboBox.addItem("橙");
     endColorComboBox.setSelectedIndex(1);
     add(endColorComboBox);
 
@@ -123,11 +123,11 @@ public class GradientPanel extends MainPanel {
 
   private Color getColor(JComboBox<String> colorComboBox) {
     if (colorComboBox.getSelectedIndex() == 0) {
-      return Color.RED;
-    } else if (colorComboBox.getSelectedIndex() == 1) {
-      return Color.YELLOW;
-    } else {
       return Color.BLUE;
+    } else if (colorComboBox.getSelectedIndex() == 1) {
+      return Color.GREEN;
+    } else {
+      return Color.ORANGE;
     }
   }
 
