@@ -1,41 +1,40 @@
 package view;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Polygon;
-import java.awt.RenderingHints;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JTextField;
 import view.animation.BufferInterpolator;
+import view.animation.path.CircleAnimationPath;
+import view.animation.path.SquareAnimationPath;
 
 public class AnimationPanel extends MainPanel implements Runnable {
 
   private static final long serialVersionUID = -4664401356270767037L;
-
-  private final JButton toggleButton;
-  private final JLabel captionLabel;
-  private final int moveRadius;
-  private final Point movePoint;
-  private final int frameCount;
-  private final BufferInterpolator interpolator;
-  private byte playType;
+  private final JLabel frameCountLabel;
+  private final JTextField frameCountTextField;
+  private final JLabel pathLabel;
+  private final JComboBox<String> pathComboBox;
+  private final JLabel bufferLabel;
+  private final JComboBox<String> bufferComboBox;
+  private final JButton runButton;
+  private BufferInterpolator interpolator;
   private Thread thread;
   private boolean stopThread;
 
   public AnimationPanel(Font componentFont) {
     super(componentFont);
-
-    toggleButton = new JButton();
-    captionLabel = new JLabel();
-    moveRadius = 30; // 动画路径的半径。
-    movePoint = new Point(-moveRadius, -moveRadius); // 动画路径平移点。
-    interpolator = new BufferInterpolator(getBackground()); // 双缓存绘制器。
-    playType = 1; // 播放状态标志，1=未使用双缓存，2=使用双缓存。
-    frameCount = 24; // 帧数。
+    frameCountLabel = new JLabel();
+    frameCountTextField = new JTextField();
+    pathLabel = new JLabel();
+    pathComboBox = new JComboBox<>();
+    bufferLabel = new JLabel();
+    bufferComboBox = new JComboBox<>();
+    runButton = new JButton();
+    interpolator = new BufferInterpolator(getBackground(), new SquareAnimationPath()); // 双缓存绘制器。
     thread = null; // 动画线程。
     stopThread = false; // 动画线程结束标志。
   }
@@ -45,45 +44,87 @@ public class AnimationPanel extends MainPanel implements Runnable {
     super.initialize(actionListener);
     Font componentFont = getComponentFont();
 
-    toggleButton.setName("AnimationPanel:ToggleButton");
-    toggleButton.setBounds(5, 5, 40, 20);
-    toggleButton.setFont(componentFont);
-    toggleButton.setText("切换");
-    toggleButton.addActionListener(actionListener);
-    add(toggleButton);
+    frameCountLabel.setBounds(5, 5, 100, 20);
+    frameCountLabel.setFont(componentFont);
+    frameCountLabel.setText("每秒刷新：");
+    add(frameCountLabel);
 
-    captionLabel.setBounds(50, 5, 100, 20);
-    captionLabel.setFont(componentFont);
-    captionLabel.setText("未使用双缓存");
-    add(captionLabel);
+    frameCountTextField.setBounds(70, 5, 40, 20);
+    frameCountTextField.setFont(componentFont);
+    frameCountTextField.setText("24");
+    add(frameCountTextField);
+
+    pathLabel.setBounds(115, 5, 100, 20);
+    pathLabel.setFont(componentFont);
+    pathLabel.setText("动画路径：");
+    add(pathLabel);
+
+    pathComboBox.setBounds(180, 5, 100, 20);
+    pathComboBox.setFont(componentFont);
+    pathComboBox.addItem("正方形");
+    pathComboBox.addItem("圆形");
+    pathComboBox.setSelectedIndex(0);
+    add(pathComboBox);
+
+    bufferLabel.setBounds(285, 5, 60, 20);
+    bufferLabel.setFont(componentFont);
+    bufferLabel.setText("双缓存：");
+    add(bufferLabel);
+
+    bufferComboBox.setBounds(335, 5, 100, 20);
+    bufferComboBox.setFont(componentFont);
+    bufferComboBox.addItem("未使用");
+    bufferComboBox.addItem("使用");
+    bufferComboBox.setSelectedIndex(0);
+    add(bufferComboBox);
+
+    runButton.setName("AnimationPanel:RunButton");
+    runButton.setBounds(440, 5, 40, 20);
+    runButton.setFont(componentFont);
+    runButton.setText("开始");
+    runButton.addActionListener(actionListener);
+    add(runButton);
   }
 
   public void togglePlayType() {
-    if (playType == 1) {
-      captionLabel.setText("使用双缓存");
-      playType = 2;
+    if (runButton.getText().equals("开始")) {
+      // 更新控件状态。
+      runButton.setText("结束");
+      frameCountTextField.setEnabled(false);
+      pathComboBox.setEnabled(false);
+      bufferComboBox.setEnabled(false);
+      interpolator = getBufferInterpolator();
+
+      // 启动动画线程和双缓存绘制器。
+      interpolator.start();
+      stopThread = false;
+      if (thread == null) {
+        thread = new Thread(this);
+        thread.start();
+      }
     } else {
-      captionLabel.setText("未使用双缓存");
-      playType = 1;
-    }
+      // 终止动画线程和双缓存绘制器。
+      stopThread = true;
+      interpolator.stop();
 
-    updateUI();
-  }
-
-  public void animationStart() {
-    // 启动动画线程和双缓存绘制器。
-    interpolator.start();
-    stopThread = false;
-    if (thread == null) {
-      thread = new Thread(this);
-      thread.start();
+      // 更新控件状态。
+      runButton.setText("开始");
+      frameCountTextField.setEnabled(true);
+      pathComboBox.setEnabled(true);
+      bufferComboBox.setEnabled(true);
     }
   }
 
-  public void animationStop() {
+  public void resetPlayType() {
     // 终止动画线程和双缓存绘制器。
     stopThread = true;
     interpolator.stop();
+
+    // 重制控件状态。
+    runButton.setText("开始");
+    frameCountTextField.setEnabled(true);
+    pathComboBox.setEnabled(true);
+    bufferComboBox.setEnabled(true);
   }
 
   @Override
@@ -96,40 +137,15 @@ public class AnimationPanel extends MainPanel implements Runnable {
     draw(graphics2D);
   }
 
-  private void draw(Graphics2D graphics2D) {
-    if (playType == 1) {
-      // 未使用双缓存绘制。
-      int[] polygonXPoints = new int[] {200, 130, 350, 350, 250, 300};
-      int[] polygonYPoints = new int[] {50, 350, 350, 270, 270, 130};
-      Polygon polygon = new Polygon(polygonXPoints, polygonYPoints, 6);
-      polygon.translate(movePoint.x, movePoint.y);
-
-      // 循环绘制100次制造绘制大量元素的情况。
-      for (int i = 0; i < 100; i++) {
-        graphics2D.setRenderingHint(
-            RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        graphics2D.setColor(Color.decode("#4281ff"));
-        graphics2D.fillPolygon(polygon);
-        graphics2D.setColor(Color.decode("#074589"));
-        graphics2D.setStroke(new BasicStroke(3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        graphics2D.drawPolygon(polygon);
-      }
-    } else {
-      // 使用双缓存绘制。
-      graphics2D.drawImage(interpolator.getBufferImage(), 0, 0, 500, 500, null);
-    }
-  }
-
   @Override
   public void run() {
     while (thread != null && !stopThread) {
       try {
-        updateMovePoint();
-        interpolator.update(movePoint);
+        interpolator.update();
         updateUI();
 
         // 根据帧数控制绘制间隔。
-        thread.join(1000 / frameCount);
+        thread.join(1000 / getFrameCount());
       } catch (InterruptedException ignored) {
       }
     }
@@ -137,28 +153,44 @@ public class AnimationPanel extends MainPanel implements Runnable {
     thread = null;
   }
 
-  private void updateMovePoint() {
-    // 更新绘制图形的平移位置，作正矩形路径平移。
-    if (movePoint.y == -moveRadius) {
-      if (movePoint.x == moveRadius) {
-        movePoint.setLocation(movePoint.x, movePoint.y + 1);
-      } else {
-        movePoint.setLocation(movePoint.x + 1, movePoint.y);
-      }
-    } else if (movePoint.x == moveRadius) {
-      if (movePoint.y == moveRadius) {
-        movePoint.setLocation(movePoint.x - 1, movePoint.y);
-      } else {
-        movePoint.setLocation(movePoint.x, movePoint.y + 1);
-      }
-    } else if (movePoint.y == moveRadius) {
-      if (movePoint.x == -moveRadius) {
-        movePoint.setLocation(movePoint.x, movePoint.y - 1);
-      } else {
-        movePoint.setLocation(movePoint.x - 1, movePoint.y);
-      }
-    } else if (movePoint.x == -moveRadius) {
-      movePoint.setLocation(movePoint.x, movePoint.y - 1);
+  private int getFrameCount() {
+    int min = 1;
+    int max = 200;
+    int value = min;
+
+    try {
+      value = Integer.parseInt(frameCountTextField.getText());
+    } catch (NumberFormatException ignored) {
+    }
+
+    if (value < min) {
+      value = min;
+    } else if (value > max) {
+      value = max;
+    }
+
+    return value;
+  }
+
+  private BufferInterpolator getBufferInterpolator() {
+    if (pathComboBox.getSelectedIndex() == 0) {
+      return new BufferInterpolator(getBackground(), new SquareAnimationPath());
+    } else {
+      return new BufferInterpolator(getBackground(), new CircleAnimationPath());
+    }
+  }
+
+  private void draw(Graphics2D graphics2D) {
+    if (thread == null) {
+      return;
+    }
+
+    if (bufferComboBox.getSelectedIndex() == 0) {
+      // 未使用双缓存绘制。
+      interpolator.drawContent(graphics2D);
+    } else {
+      // 使用双缓存绘制。
+      graphics2D.drawImage(interpolator.getBufferImage(), 0, 0, 500, 500, null);
     }
   }
 }

@@ -56,7 +56,7 @@ public class MainFrameController extends WindowAdapter implements ActionListener
   @Override
   public void windowClosing(WindowEvent e) {
     super.windowClosing(e);
-    animationPanel.animationStop();
+    animationPanel.resetPlayType();
   }
 
   @Override
@@ -76,7 +76,6 @@ public class MainFrameController extends WindowAdapter implements ActionListener
       updateMainFramePanel(glowPanel);
     } else if ("MainFrame:AnimationShowButton".equals(name)) {
       updateMainFramePanel(animationPanel);
-      animationPanel.animationStart();
     } else if ("MainFrame:ConvolutionShowButton".equals(name)) {
       updateMainFramePanel(convolutionPanel);
     } else if ("MainFrame:CompressionShowButton".equals(name)) {
@@ -86,7 +85,7 @@ public class MainFrameController extends WindowAdapter implements ActionListener
       if (mainFramePanel != null) {
         mainFramePanel.updateUI();
       }
-    } else if ("AnimationPanel:ToggleButton".equals(name)) {
+    } else if ("AnimationPanel:RunButton".equals(name)) {
       animationPanel.togglePlayType();
     } else if ("ConvolutionPanel:KernelRadioButton".equals(name)) {
       convolutionPanel.switchKernel();
@@ -101,15 +100,12 @@ public class MainFrameController extends WindowAdapter implements ActionListener
     if (mainFramePanel != null) {
       container.remove(mainFramePanel);
       if (mainFramePanel instanceof AnimationPanel) {
-        ((AnimationPanel) mainFramePanel).animationStop();
+        ((AnimationPanel) mainFramePanel).resetPlayType();
       }
     }
 
     mainFramePanel = panel;
     container.add(mainFramePanel);
     mainFramePanel.updateUI();
-    if (mainFramePanel instanceof AnimationPanel) {
-      ((AnimationPanel) mainFramePanel).animationStart();
-    }
   }
 }

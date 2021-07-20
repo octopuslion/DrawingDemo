@@ -61,8 +61,9 @@ public class ImageBilinearInterpolator extends ImageInterpolator {
   private double getYByFunction(
       double sourceX1, double sourceY1, double sourceX2, double sourceY2, double targetX) {
     // 为二元一次方程构造并求解，如果横纵坐标分别相同，则直接返回结果。
-    if (Math.abs(sourceY1 - sourceY2) <= Double.MIN_NORMAL
-        || Math.abs(sourceX1 - sourceX2) <= Double.MIN_NORMAL) {
+
+    if (Double.doubleToLongBits(sourceY1) == Double.doubleToLongBits(sourceY2)
+        || Double.doubleToLongBits(sourceX1) == Double.doubleToLongBits(sourceX2)) {
       return sourceY1;
     }
 
