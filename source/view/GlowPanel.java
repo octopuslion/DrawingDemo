@@ -7,32 +7,147 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
+import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 public class GlowPanel extends MainPanel {
 
   private static final long serialVersionUID = -2392853781581527961L;
-  private final Polygon polygon;
+  private final JLabel colorLabel;
+  private final JComboBox<String> colorComboBox;
+  private final JLabel maxAlphaLabel;
+  private final JTextField maxAlphaTextField;
+  private final JLabel decreaseAlphaLabel;
+  private final JTextField decreaseAlphaTextField;
+  private final JLabel layerCountLabel;
+  private final JTextField layerCountTextField;
+  private final JLabel layerRadiusLabel;
+  private final JTextField layerRadiusTextField;
 
   public GlowPanel(Font componentFont) {
     super(componentFont);
-    int[] polygonXPoints = new int[] {200, 130, 350, 350, 250, 300};
-    int[] polygonYPoints = new int[] {50, 350, 350, 270, 270, 130};
-    polygon = new Polygon(polygonXPoints, polygonYPoints, 6);
+    colorLabel = new JLabel();
+    colorComboBox = new JComboBox<>();
+    maxAlphaLabel = new JLabel();
+    maxAlphaTextField = new JTextField();
+    decreaseAlphaLabel = new JLabel();
+    decreaseAlphaTextField = new JTextField();
+    layerCountLabel = new JLabel();
+    layerCountTextField = new JTextField();
+    layerRadiusLabel = new JLabel();
+    layerRadiusTextField = new JTextField();
+  }
+
+  @Override
+  public void initialize(ActionListener actionListener) {
+    super.initialize(actionListener);
+    Font componentFont = getComponentFont();
+
+    colorLabel.setBounds(5, 5, 60, 20);
+    colorLabel.setFont(componentFont);
+    colorLabel.setText("颜色：");
+    add(colorLabel);
+
+    colorComboBox.setBounds(40, 5, 90, 20);
+    colorComboBox.setFont(componentFont);
+    colorComboBox.addItem("颜色1");
+    colorComboBox.addItem("颜色2");
+    colorComboBox.addItem("颜色3");
+    colorComboBox.setSelectedIndex(0);
+    add(colorComboBox);
+
+    maxAlphaLabel.setBounds(135, 5, 100, 20);
+    maxAlphaLabel.setFont(componentFont);
+    maxAlphaLabel.setText("最大透明：");
+    add(maxAlphaLabel);
+
+    maxAlphaTextField.setBounds(200, 5, 40, 20);
+    maxAlphaTextField.setFont(componentFont);
+    maxAlphaTextField.setText("30");
+    add(maxAlphaTextField);
+
+    decreaseAlphaLabel.setBounds(245, 5, 100, 20);
+    decreaseAlphaLabel.setFont(componentFont);
+    decreaseAlphaLabel.setText("透明减量：");
+    add(decreaseAlphaLabel);
+
+    decreaseAlphaTextField.setBounds(310, 5, 40, 20);
+    decreaseAlphaTextField.setFont(componentFont);
+    decreaseAlphaTextField.setText("1");
+    add(decreaseAlphaTextField);
+
+    layerCountLabel.setBounds(355, 5, 60, 20);
+    layerCountLabel.setFont(componentFont);
+    layerCountLabel.setText("层数：");
+    add(layerCountLabel);
+
+    layerCountTextField.setBounds(390, 5, 40, 20);
+    layerCountTextField.setFont(componentFont);
+    layerCountTextField.setText("30");
+    add(layerCountTextField);
+
+    layerRadiusLabel.setBounds(435, 5, 100, 20);
+    layerRadiusLabel.setFont(componentFont);
+    layerRadiusLabel.setText("单层半径：");
+    add(layerRadiusLabel);
+
+    layerRadiusTextField.setBounds(500, 5, 40, 20);
+    layerRadiusTextField.setFont(componentFont);
+    layerRadiusTextField.setText("1");
+    add(layerRadiusTextField);
   }
 
   @Override
   protected void drawLeftCanvas(Graphics2D graphics2D) {
-    draw(graphics2D, polygon);
+    Polygon polygon = createShape();
+    drawPlain(graphics2D, polygon);
   }
 
   @Override
   protected void drawRightCanvas(Graphics2D graphics2D) {
+    // 优先绘制发光，再绘制原图。
+    Polygon polygon = createShape();
     drawGlow(graphics2D, polygon);
-    draw(graphics2D, polygon);
+    drawPlain(graphics2D, polygon);
   }
 
-  private void draw(Graphics2D graphics2D, Polygon polygon) {
+  private Polygon createShape() {
+    int[] polygonXPoints = new int[] {200, 130, 350, 350, 250, 300};
+    int[] polygonYPoints = new int[] {50, 350, 350, 270, 270, 130};
+    return new Polygon(polygonXPoints, polygonYPoints, 6);
+  }
+
+  private Color getColor() {
+    if (colorComboBox.getSelectedIndex() == 0) {
+      return Color.decode("#00a7ff");
+    } else if (colorComboBox.getSelectedIndex() == 1) {
+      return Color.decode("#75c44c");
+    } else {
+      return Color.decode("#ff993c");
+    }
+  }
+
+  private int getValue(JTextField textField, int min, int max) {
+    int value = min;
+
+    try {
+      value = Integer.parseInt(textField.getText());
+    } catch (NumberFormatException ignored) {
+    }
+
+    if (value < min) {
+      value = min;
+    } else if (value > max) {
+      value = max;
+    }
+
+    return value;
+  }
+
+  private void drawPlain(Graphics2D graphics2D, Polygon polygon) {
     graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     graphics2D.setColor(Color.decode("#4281ff"));
     graphics2D.fillPolygon(polygon);
@@ -42,26 +157,29 @@ public class GlowPanel extends MainPanel {
   }
 
   private void drawGlow(Graphics2D graphics2D, Polygon polygon) {
-    graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-    Color glowColor = Color.decode("#00a7ff"); // 光罩颜色。
-    double expandStepLength = 1; // 控制单层光罩的像素长度。
-    int alphaValue = 0; // 光罩的开始透明度，最低透明度，0-255。
-    int alphaStepValue = 1; // 光罩的透明度增量，透明度逐渐增大，0为不变。
-    int step = 30; // 光罩增量，1为一层光罩。
+    // 绘制发光效果。
+    Color glowColor = getColor(); // 光罩颜色。
+    int maxAlpha = getValue(maxAlphaTextField, 0, 255); // 光罩的开始透明度，最高透明度，0-255。
+    int decreaseAlpha = getValue(decreaseAlphaTextField, 0, 255); // 光罩的透明度减量，透明度逐渐减小，0为不变。
+    int layerCount = getValue(layerCountTextField, 0, 100); // 光罩增量，1为一层光罩。
+    int layerRadius = getValue(layerRadiusTextField, 1, 500); // 控制单层光罩的像素长度。
 
     // 绘制顺序由远及近。
-    for (int i = step - 1; i >= 0; i--) {
+    graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    for (int i = layerCount; i >= 1; i--) {
       // 计算得到此层光罩的绘制图形。
-      Polygon expandPolygon = expand(polygon, expandStepLength * i);
+      Polygon expandPolygon = expand(polygon, layerRadius * i);
+
+      // 计算得到此层阴影透明度。
+      int alphaValue = maxAlpha - decreaseAlpha * (i - 1);
+      if (alphaValue < 0) {
+        alphaValue = 0;
+      }
 
       // 绘制此层光罩。
       graphics2D.setColor(
           new Color(glowColor.getRed(), glowColor.getGreen(), glowColor.getBlue(), alphaValue));
       graphics2D.fillPolygon(expandPolygon);
-
-      // 光罩透明度累增。
-      alphaValue += alphaStepValue;
     }
   }
 

@@ -82,7 +82,7 @@ public class MainFrame extends JFrame {
     container.add(compressionShowButton);
 
     refreshButton.setName("MainFrame:RefreshButton");
-    refreshButton.setBounds(980, 545, 40, 20);
+    refreshButton.setBounds(980, 5, 40, 20);
     refreshButton.setFont(componentFont);
     refreshButton.setText("刷新");
     refreshButton.addActionListener(actionListener);
