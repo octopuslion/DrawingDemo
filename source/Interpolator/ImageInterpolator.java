@@ -7,10 +7,10 @@ public abstract class ImageInterpolator {
   private final int targetWidth;
   private final int targetHeight;
 
-  public ImageInterpolator() {
+  public ImageInterpolator(int targetWidth, int targetHeight) {
     // 目标图像的尺寸，大于原图为放大，小于原图为压缩。
-    targetWidth = 300;
-    targetHeight = 300;
+    this.targetWidth = targetWidth;
+    this.targetHeight = targetHeight;
   }
 
   public BufferedImage compress(BufferedImage sourceImage) {

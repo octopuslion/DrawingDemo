@@ -4,7 +4,8 @@ public class ImageCubicConvolutionInterpolator extends ImageBicubicInterpolator 
 
   private final double parameterA;
 
-  public ImageCubicConvolutionInterpolator() {
+  public ImageCubicConvolutionInterpolator(int targetWidth, int targetHeight) {
+    super(targetWidth, targetHeight);
     parameterA = -1;
   }
 

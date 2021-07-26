@@ -4,7 +4,9 @@ import java.awt.Color;
 
 public class ImageClosestNeighborInterpolator extends ImageInterpolator {
 
-  public ImageClosestNeighborInterpolator() {}
+  public ImageClosestNeighborInterpolator(int targetWidth, int targetHeight) {
+    super(targetWidth, targetHeight);
+  }
 
   @Override
   public int getRadius() {

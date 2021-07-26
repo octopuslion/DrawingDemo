@@ -6,6 +6,9 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import resource.Resource;
 
@@ -15,7 +18,13 @@ public class ConvolutionPanel extends MainPanel {
   private final JRadioButton kernel1RadioButton;
   private final JRadioButton kernel2RadioButton;
   private final JRadioButton kernel3RadioButton;
+  private final JRadioButton kernel4RadioButton;
   private final ButtonGroup buttonGroup;
+  private final JLabel varianceLabel;
+  private final JComboBox<String> varianceComboBox;
+  private final JLabel radiusLabel;
+  private final JComboBox<String> radiusComboBox;
+  private final JButton updateButton;
   private BufferedImage leftImage;
   private BufferedImage rightImage;
   private double[][] kernel;
@@ -25,7 +34,13 @@ public class ConvolutionPanel extends MainPanel {
     kernel1RadioButton = new JRadioButton();
     kernel2RadioButton = new JRadioButton();
     kernel3RadioButton = new JRadioButton();
+    kernel4RadioButton = new JRadioButton();
     buttonGroup = new ButtonGroup();
+    varianceLabel = new JLabel();
+    varianceComboBox = new JComboBox<>();
+    radiusLabel = new JLabel();
+    radiusComboBox = new JComboBox<>();
+    updateButton = new JButton();
     leftImage = null;
     rightImage = null;
     kernel = null;
@@ -63,6 +78,48 @@ public class ConvolutionPanel extends MainPanel {
     kernel3RadioButton.addActionListener(actionListener);
     buttonGroup.add(kernel3RadioButton);
     add(kernel3RadioButton);
+
+    kernel4RadioButton.setName("ConvolutionPanel:KernelRadioButton");
+    kernel4RadioButton.setFont(componentFont);
+    kernel4RadioButton.setText("自定义高斯");
+    kernel4RadioButton.setBounds(200, 5, 110, 20);
+    kernel4RadioButton.setOpaque(true);
+    kernel4RadioButton.addActionListener(actionListener);
+    buttonGroup.add(kernel4RadioButton);
+    add(kernel4RadioButton);
+
+    varianceLabel.setBounds(315, 5, 50, 20);
+    varianceLabel.setFont(componentFont);
+    varianceLabel.setText("方差：");
+    add(varianceLabel);
+
+    varianceComboBox.setBounds(350, 5, 70, 20);
+    varianceComboBox.setFont(componentFont);
+    varianceComboBox.addItem("1");
+    varianceComboBox.addItem("2");
+    varianceComboBox.addItem("3");
+    varianceComboBox.setSelectedIndex(0);
+    add(varianceComboBox);
+
+    radiusLabel.setBounds(425, 5, 50, 20);
+    radiusLabel.setFont(componentFont);
+    radiusLabel.setText("半径：");
+    add(radiusLabel);
+
+    radiusComboBox.setBounds(460, 5, 70, 20);
+    radiusComboBox.setFont(componentFont);
+    radiusComboBox.addItem("1");
+    radiusComboBox.addItem("3");
+    radiusComboBox.addItem("5");
+    radiusComboBox.setSelectedIndex(0);
+    add(radiusComboBox);
+
+    updateButton.setName("ConvolutionPanel:UpdateButton");
+    updateButton.setBounds(535, 5, 40, 20);
+    updateButton.setFont(componentFont);
+    updateButton.setText("更新");
+    updateButton.addActionListener(actionListener);
+    add(updateButton);
   }
 
   public void switchKernel() {
@@ -82,13 +139,29 @@ public class ConvolutionPanel extends MainPanel {
             {4.0 / 256, 16.0 / 256, 24.0 / 256, 16.0 / 256, 4.0 / 256},
             {1.0 / 256, 4.0 / 256, 6.0 / 256, 4.0 / 256, 1.0 / 256}
           };
-    } else {
+    } else if (kernel3RadioButton.isSelected()) {
       // 锐化，3*3。
       kernel = new double[][] {{-1, -1, -1}, {-1, 9, -1}, {-1, -1, -1}};
+    } else {
+      // 自定义高斯卷积核。
+      double variance = getValue(varianceComboBox);
+      int radius = getValue(radiusComboBox);
+      kernel = getCustomKernel(variance, radius);
     }
 
     rightImage = convolute(leftImage, kernel);
     updateUI();
+  }
+
+  public void updateKernel() {
+    if (kernel4RadioButton.isSelected()) {
+      // 更新自定义高斯卷积核。
+      double variance = getValue(varianceComboBox);
+      int radius = getValue(radiusComboBox);
+      kernel = getCustomKernel(variance, radius);
+      rightImage = convolute(leftImage, kernel);
+      updateUI();
+    }
   }
 
   @Override
@@ -101,6 +174,42 @@ public class ConvolutionPanel extends MainPanel {
     BufferedImage drawingImage = rightImage == null ? leftImage : rightImage;
     graphics2D.drawImage(
         drawingImage, 5, 5, drawingImage.getWidth(), drawingImage.getHeight(), null);
+  }
+
+  private int getValue(JComboBox<String> comboBox) {
+    String text = (String) comboBox.getSelectedItem();
+    if (text != null) {
+      return Integer.parseInt(text);
+    } else {
+      return 1;
+    }
+  }
+
+  private double[][] getCustomKernel(double variance, int radius) {
+    double[][] kernel = new double[2 * radius + 1][2 * radius + 1];
+
+    double sum = 0;
+    for (int i = 0; i < kernel[0].length; i++) {
+      for (int j = 0; j < kernel.length; j++) {
+        int x = i - radius;
+        int y = j - radius;
+
+        // 使用二维高斯公式计算得到相应位置的高斯值。
+        kernel[i][j] =
+            Math.pow(Math.E, -(x * x + y * y) / (2 * variance * variance))
+                / (2 * Math.PI * variance * variance);
+        sum += kernel[i][j];
+      }
+    }
+
+    // 进行归一化。
+    for (int i = 0; i < kernel[0].length; i++) {
+      for (int j = 0; j < kernel.length; j++) {
+        kernel[i][j] /= sum;
+      }
+    }
+
+    return kernel;
   }
 
   private BufferedImage convolute(BufferedImage sourceImage, double[][] kernel) {

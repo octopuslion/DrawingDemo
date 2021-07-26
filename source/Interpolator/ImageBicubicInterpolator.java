@@ -4,7 +4,9 @@ import java.awt.Color;
 
 public abstract class ImageBicubicInterpolator extends ImageInterpolator {
 
-  public ImageBicubicInterpolator() {}
+  public ImageBicubicInterpolator(int targetWidth, int targetHeight) {
+    super(targetWidth, targetHeight);
+  }
 
   @Override
   protected int getRadius() {

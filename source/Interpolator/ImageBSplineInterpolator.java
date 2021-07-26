@@ -2,7 +2,9 @@ package Interpolator;
 
 public class ImageBSplineInterpolator extends ImageBicubicInterpolator {
 
-  public ImageBSplineInterpolator() {}
+  public ImageBSplineInterpolator(int targetWidth, int targetHeight) {
+    super(targetWidth, targetHeight);
+  }
 
   @Override
   protected double getYByFunction(double x) {

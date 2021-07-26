@@ -89,6 +89,8 @@ public class MainFrameController extends WindowAdapter implements ActionListener
       animationPanel.togglePlayType();
     } else if ("ConvolutionPanel:KernelRadioButton".equals(name)) {
       convolutionPanel.switchKernel();
+    } else if ("ConvolutionPanel:UpdateButton".equals(name)) {
+      convolutionPanel.updateKernel();
     } else if ("CompressionPanel:AlgorithmRadioButton".equals(name)) {
       compressionPanel.switchAlgorithm();
     }

@@ -4,7 +4,9 @@ import java.awt.Color;
 
 public class ImageBilinearInterpolator extends ImageInterpolator {
 
-  public ImageBilinearInterpolator() {}
+  public ImageBilinearInterpolator(int targetWidth, int targetHeight) {
+    super(targetWidth, targetHeight);
+  }
 
   @Override
   protected int getRadius() {
