@@ -137,8 +137,8 @@ public class ShadowPanel extends MainPanel {
   }
 
   private Polygon createShape() {
-    int[] polygonXPoints = new int[] {200, 130, 350, 350, 250, 300};
-    int[] polygonYPoints = new int[] {50, 350, 350, 270, 270, 130};
+    int[] polygonXPoints = new int[] {200, 100, 550, 550, 330, 400};
+    int[] polygonYPoints = new int[] {100, 600, 600, 470, 470, 230};
     return new Polygon(polygonXPoints, polygonYPoints, 6);
   }
 

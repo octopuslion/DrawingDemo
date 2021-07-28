@@ -21,8 +21,8 @@ public class ImageClosestNeighborInterpolator extends ImageInterpolator {
     double minDistance = Double.MAX_VALUE;
     int matchedSourceX = sourceLeftX;
     int matchedSourceY = sourceTopY;
-    for (int i = 0; i < 2; i++) {
-      for (int j = 0; j < 2; j++) {
+    for (int j = 0; j < 2; j++) {
+      for (int i = 0; i < 2; i++) {
         int sourceX = sourceLeftX + i;
         int sourceY = sourceTopY + j;
         double distance = getDistance(targetX, targetY, sourceX, sourceY);
@@ -34,6 +34,6 @@ public class ImageClosestNeighborInterpolator extends ImageInterpolator {
       }
     }
 
-    return sourceColors[matchedSourceX][matchedSourceY];
+    return sourceColors[matchedSourceY][matchedSourceX];
   }
 }

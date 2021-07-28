@@ -81,7 +81,7 @@ public class MainFrameController extends WindowAdapter implements ActionListener
     } else if ("MainFrame:CompressionShowButton".equals(name)) {
       updateMainFramePanel(compressionPanel);
     } else if ("MainFrame:RefreshButton".equals(name)) {
-      mainFrame.setSize(1030, 590);
+      mainFrame.setSize(1440, 900);
       if (mainFramePanel != null) {
         mainFramePanel.updateUI();
       }

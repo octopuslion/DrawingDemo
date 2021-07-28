@@ -189,23 +189,23 @@ public class ConvolutionPanel extends MainPanel {
     double[][] kernel = new double[2 * radius + 1][2 * radius + 1];
 
     double sum = 0;
-    for (int i = 0; i < kernel[0].length; i++) {
-      for (int j = 0; j < kernel.length; j++) {
+    for (int j = 0; j < kernel.length; j++) {
+      for (int i = 0; i < kernel[0].length; i++) {
         int x = i - radius;
         int y = j - radius;
 
         // 使用二维高斯公式计算得到相应位置的高斯值。
-        kernel[i][j] =
+        kernel[j][i] =
             Math.pow(Math.E, -(x * x + y * y) / (2 * variance * variance))
                 / (2 * Math.PI * variance * variance);
-        sum += kernel[i][j];
+        sum += kernel[j][i];
       }
     }
 
     // 进行归一化。
-    for (int i = 0; i < kernel[0].length; i++) {
-      for (int j = 0; j < kernel.length; j++) {
-        kernel[i][j] /= sum;
+    for (int j = 0; j < kernel.length; j++) {
+      for (int i = 0; i < kernel[0].length; i++) {
+        kernel[j][i] /= sum;
       }
     }
 
@@ -214,29 +214,29 @@ public class ConvolutionPanel extends MainPanel {
 
   private BufferedImage convolute(BufferedImage sourceImage, double[][] kernel) {
     Color[][] sourceColors = getImageColors(sourceImage, kernel.length);
-    Color[][] targetColors = new Color[sourceColors[0].length][sourceColors.length];
+    Color[][] targetColors = new Color[sourceColors.length][sourceColors[0].length];
 
     // 进行卷积操作，对RGB三个颜色通道分别进行卷积运算，透明度不参与卷积。
-    for (int i = kernel.length; i < sourceColors[0].length - kernel.length; i++) {
-      for (int j = kernel.length; j < sourceColors.length - kernel.length; j++) {
+    for (int j = kernel.length; j < sourceColors.length - kernel.length; j++) {
+      for (int i = kernel.length; i < sourceColors[0].length - kernel.length; i++) {
         double red = 0;
         double green = 0;
         double blue = 0;
-        for (int m = 0; m < kernel.length; m++) {
-          for (int n = 0; n < kernel.length; n++) {
-            Color sourceColor = sourceColors[i - kernel.length / 2 + m][j - kernel.length / 2 + n];
-            red += sourceColor.getRed() * kernel[m][n];
-            green += sourceColor.getGreen() * kernel[m][n];
-            blue += sourceColor.getBlue() * kernel[m][n];
+        for (int n = 0; n < kernel.length; n++) {
+          for (int m = 0; m < kernel.length; m++) {
+            Color sourceColor = sourceColors[j - kernel.length / 2 + n][i - kernel.length / 2 + m];
+            red += sourceColor.getRed() * kernel[n][m];
+            green += sourceColor.getGreen() * kernel[n][m];
+            blue += sourceColor.getBlue() * kernel[n][m];
           }
         }
 
-        targetColors[i][j] =
+        targetColors[j][i] =
             new Color(
                 toColorComponent(red),
                 toColorComponent(green),
                 toColorComponent(blue),
-                sourceColors[i][j].getAlpha());
+                sourceColors[j][i].getAlpha());
       }
     }
 
@@ -245,9 +245,9 @@ public class ConvolutionPanel extends MainPanel {
     int imageHeight = sourceImage.getHeight();
     BufferedImage targetImage =
         new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
-    for (int i = 0; i < imageWidth; i++) {
-      for (int j = 0; j < imageHeight; j++) {
-        targetImage.setRGB(i, j, targetColors[i + kernel.length][j + kernel.length].getRGB());
+    for (int j = 0; j < imageHeight; j++) {
+      for (int i = 0; i < imageWidth; i++) {
+        targetImage.setRGB(i, j, targetColors[j + kernel.length][i + kernel.length].getRGB());
       }
     }
 
@@ -260,9 +260,9 @@ public class ConvolutionPanel extends MainPanel {
     int height = image.getHeight();
     int virtualWidth = width + kernelSize * 2;
     int virtualHeight = height + kernelSize * 2;
-    Color[][] colors = new Color[virtualWidth][virtualHeight];
-    for (int i = 0; i < virtualWidth; i++) {
-      for (int j = 0; j < virtualHeight; j++) {
+    Color[][] colors = new Color[virtualHeight][virtualWidth];
+    for (int j = 0; j < virtualHeight; j++) {
+      for (int i = 0; i < virtualWidth; i++) {
         if (i >= kernelSize
             && i < width + kernelSize
             && j >= kernelSize
@@ -272,9 +272,9 @@ public class ConvolutionPanel extends MainPanel {
           int red = (colorValue >> 16) & 0xff;
           int green = (colorValue >> 8) & 0xff;
           int blue = colorValue & 0xff;
-          colors[i][j] = new Color(red, green, blue, alpha);
+          colors[j][i] = new Color(red, green, blue, alpha);
         } else {
-          colors[i][j] = new Color(0, 0, 0);
+          colors[j][i] = new Color(0, 0, 0);
         }
       }
     }

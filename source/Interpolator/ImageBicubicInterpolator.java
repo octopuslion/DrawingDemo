@@ -19,9 +19,9 @@ public abstract class ImageBicubicInterpolator extends ImageInterpolator {
       double targetX, double targetY, int sourceLeftX, int sourceTopY, Color[][] sourceColors) {
     // 步骤1：分别计算水平和垂直方向上的点距离，带入基函数得到两个分量权重，取乘积为该原图点颜色权重值。
     double[][] weights = new double[4][4];
-    for (int i = 0; i < 4; i++) {
-      for (int j = 0; j < 4; j++) {
-        weights[i][j] =
+    for (int j = 0; j < 4; j++) {
+      for (int i = 0; i < 4; i++) {
+        weights[j][i] =
             getYByFunction(Math.abs(sourceLeftX + i - targetX))
                 * getYByFunction(Math.abs(sourceTopY + j - targetY));
       }
@@ -35,13 +35,13 @@ public abstract class ImageBicubicInterpolator extends ImageInterpolator {
     double green = 0;
     double blue = 0;
     double alpha = 0;
-    for (int i = 0; i < 4; i++) {
-      for (int j = 0; j < 4; j++) {
-        Color sourceColor = sourceColors[sourceLeftX + i][sourceTopY + j];
-        red += sourceColor.getRed() * weights[i][j];
-        green += sourceColor.getGreen() * weights[i][j];
-        blue += sourceColor.getBlue() * weights[i][j];
-        alpha += sourceColor.getAlpha() * weights[i][j];
+    for (int j = 0; j < 4; j++) {
+      for (int i = 0; i < 4; i++) {
+        Color sourceColor = sourceColors[sourceTopY + j][sourceLeftX + i];
+        red += sourceColor.getRed() * weights[j][i];
+        green += sourceColor.getGreen() * weights[j][i];
+        blue += sourceColor.getBlue() * weights[j][i];
+        alpha += sourceColor.getAlpha() * weights[j][i];
       }
     }
 
@@ -58,21 +58,21 @@ public abstract class ImageBicubicInterpolator extends ImageInterpolator {
   private double[][] getNormalizedWeights(double[][] sourceWeights) {
     // 求得权重系数总和。
     double sum = 0;
-    for (int i = 0; i < sourceWeights[0].length; i++) {
-      for (int j = 0; j < sourceWeights.length; j++) {
-        sum += sourceWeights[i][j];
+    for (double[] sourceWeight : sourceWeights) {
+      for (int i = 0; i < sourceWeights[0].length; i++) {
+        sum += sourceWeight[i];
       }
     }
 
-    double[][] targetWeights = new double[sourceWeights[0].length][sourceWeights.length];
-    for (int i = 0; i < sourceWeights[0].length; i++) {
-      for (int j = 0; j < sourceWeights.length; j++) {
+    double[][] targetWeights = new double[sourceWeights.length][sourceWeights[0].length];
+    for (int j = 0; j < sourceWeights.length; j++) {
+      for (int i = 0; i < sourceWeights[0].length; i++) {
         if (sum < 0) {
           // 若总系数和小于0，则说明此权重系数矩阵的影响力为0，则所有系数均置为0。
-          targetWeights[i][j] = 0;
+          targetWeights[j][i] = 0;
         } else if (sum > 0) {
           // 否则需要调整所有权重系数的比例。
-          targetWeights[i][j] = sourceWeights[i][j] / sum;
+          targetWeights[j][i] = sourceWeights[j][i] / sum;
         }
       }
     }
