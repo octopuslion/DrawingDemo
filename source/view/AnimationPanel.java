@@ -190,7 +190,7 @@ public class AnimationPanel extends MainPanel implements Runnable {
       interpolator.drawContent(graphics2D);
     } else {
       // 使用双缓存绘制。
-      graphics2D.drawImage(interpolator.getBufferImage(), 0, 0, 500, 500, null);
+      graphics2D.drawImage(interpolator.getBufferImage(), 0, 0, 710, 730, null);
     }
   }
 }

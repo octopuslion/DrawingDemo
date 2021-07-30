@@ -35,7 +35,7 @@ public class MainFrame extends JFrame {
   public void initialize(WindowListener windowListener, ActionListener actionListener) {
     setLayout(null);
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-    setBounds(100, 100, 1030, 590);
+    setBounds(0, 0, 1440, 900);
     addWindowListener(windowListener);
     Container container = getContentPane();
 

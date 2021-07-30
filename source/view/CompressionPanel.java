@@ -5,6 +5,7 @@ import Interpolator.ImageBilinearInterpolator;
 import Interpolator.ImageClosestNeighborInterpolator;
 import Interpolator.ImageCubicConvolutionInterpolator;
 import Interpolator.ImageInterpolator;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.event.ActionListener;
@@ -56,8 +57,8 @@ public class CompressionPanel extends MainPanel {
 
     imageSizeComboBox.setBounds(70, 5, 100, 20);
     imageSizeComboBox.setFont(componentFont);
-    imageSizeComboBox.addItem("30%");
     imageSizeComboBox.addItem("70%");
+    imageSizeComboBox.addItem("90%");
     imageSizeComboBox.addItem("150%");
     imageSizeComboBox.addItem("300%");
     imageSizeComboBox.setSelectedIndex(0);
@@ -101,19 +102,19 @@ public class CompressionPanel extends MainPanel {
   }
 
   public void switchAlgorithm() {
-    int imageSize = getImageSize();
+    Dimension imageSize = getImageSize();
     if (algorithm1RadioButton.isSelected()) {
       // 最近邻算法。
-      imageInterpolator = new ImageClosestNeighborInterpolator(imageSize, imageSize);
+      imageInterpolator = new ImageClosestNeighborInterpolator(imageSize.width, imageSize.height);
     } else if (algorithm2RadioButton.isSelected()) {
       // 双线性插值算法。
-      imageInterpolator = new ImageBilinearInterpolator(imageSize, imageSize);
+      imageInterpolator = new ImageBilinearInterpolator(imageSize.width, imageSize.height);
     } else if (algorithm3RadioButton.isSelected()) {
       // B样条采样算法。
-      imageInterpolator = new ImageBSplineInterpolator(imageSize, imageSize);
+      imageInterpolator = new ImageBSplineInterpolator(imageSize.width, imageSize.height);
     } else {
       // 三次卷积采样算法。
-      imageInterpolator = new ImageCubicConvolutionInterpolator(imageSize, imageSize);
+      imageInterpolator = new ImageCubicConvolutionInterpolator(imageSize.width, imageSize.height);
     }
 
     rightImage = imageInterpolator.compress(leftImage);
@@ -132,17 +133,19 @@ public class CompressionPanel extends MainPanel {
         drawingImage, 5, 5, drawingImage.getWidth(), drawingImage.getHeight(), null);
   }
 
-  private int getImageSize() {
-    int size = 490;
+  private Dimension getImageSize() {
+    int width = leftImage.getWidth();
+    int height = leftImage.getHeight();
     String text = (String) imageSizeComboBox.getSelectedItem();
     if (text != null && text.endsWith("%")) {
       text = text.substring(0, text.length() - 1);
       try {
-        size = (int) (490 * 0.01 * Integer.parseInt(text));
+        width = (int) (width * 0.01 * Integer.parseInt(text));
+        height = (int) (height * 0.01 * Integer.parseInt(text));
       } catch (Exception ignored) {
       }
     }
 
-    return size;
+    return new Dimension(width, height);
   }
 }

@@ -23,10 +23,10 @@ public class BufferInterpolator implements Runnable {
     this.backgroundColor = backgroundColor;
 
     // 前台缓存，会被绘制到控件上。
-    frontBufferImage = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
+    frontBufferImage = new BufferedImage(710, 730, BufferedImage.TYPE_INT_ARGB);
 
     // 后台缓存，在后台线程中阻塞绘制。
-    backBufferImage = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
+    backBufferImage = new BufferedImage(710, 730, BufferedImage.TYPE_INT_ARGB);
 
     this.animationPath = animationPath;
     movePoint = animationPath.getBeginPoint(); // 动画路径平移点。
@@ -62,20 +62,20 @@ public class BufferInterpolator implements Runnable {
       // 绘制后台缓存。
       Graphics2D graphics2DForBackBuffer = (Graphics2D) backBufferImage.getGraphics();
       graphics2DForBackBuffer.setColor(backgroundColor);
-      graphics2DForBackBuffer.fillRect(0, 0, 500, 500);
+      graphics2DForBackBuffer.fillRect(0, 0, 710, 730);
       drawContent(graphics2DForBackBuffer);
 
       // 绘制前台缓存。
       Graphics2D graphics2DForFrontBuffer = (Graphics2D) frontBufferImage.getGraphics();
-      graphics2DForFrontBuffer.drawImage(backBufferImage, 0, 0, 500, 500, null);
+      graphics2DForFrontBuffer.drawImage(backBufferImage, 0, 0, 710, 730, null);
     }
 
     thread = null;
   }
 
   public void drawContent(Graphics2D graphics2D) {
-    int[] polygonXPoints = new int[] {200, 130, 350, 350, 250, 300};
-    int[] polygonYPoints = new int[] {50, 350, 350, 270, 270, 130};
+    int[] polygonXPoints = new int[] {200, 100, 550, 550, 330, 400};
+    int[] polygonYPoints = new int[] {100, 600, 600, 470, 470, 230};
     Polygon polygon = new Polygon(polygonXPoints, polygonYPoints, 6);
     Point2D.Double nextMovePoint = new Point2D.Double(movePoint.x, movePoint.y);
     graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

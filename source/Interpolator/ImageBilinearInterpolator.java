@@ -21,18 +21,18 @@ public class ImageBilinearInterpolator extends ImageInterpolator {
     Color targetTopColor =
         getColorByFunction(
             sourceLeftX,
-            sourceColors[sourceLeftX][sourceTopY],
+            sourceColors[sourceTopY][sourceLeftX],
             sourceLeftX + 1,
-            sourceColors[sourceLeftX + 1][sourceTopY],
+            sourceColors[sourceTopY][sourceLeftX + 1],
             targetX);
 
     // 步骤2：计算下方两个原图坐标点之间与目标点垂直方向上的插值颜色，采用线性采样。
     Color targetBottomColor =
         getColorByFunction(
             sourceLeftX,
-            sourceColors[sourceLeftX][sourceTopY + 1],
+            sourceColors[sourceTopY + 1][sourceLeftX],
             sourceLeftX + 1,
-            sourceColors[sourceLeftX + 1][sourceTopY + 1],
+            sourceColors[sourceTopY + 1][sourceLeftX + 1],
             targetX);
 
     // 步骤3：根据上下采样颜色以及位置来计算目标位置的插值颜色，此为在采样基础上再进行采样，故为二次采样，采用线性采样。
